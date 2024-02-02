@@ -8,8 +8,8 @@ services:
             # args:
             #     - user=${UID}
         # user: ${UID}:${UID}
-        # expose:
-        #     - "9000"
+        expose:
+            - "9000"
         depends_on:
             - mysql
         volumes:
