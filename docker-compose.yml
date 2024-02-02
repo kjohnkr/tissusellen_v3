@@ -15,7 +15,7 @@ services:
         volumes:
             - ./www/:/var/www/html/
             - ./config-files/php/php.ini:/usr/local/etc/php/php.ini
-        # restart: always
+        restart: always
         environment:
         # - DB_PASSWD=pass
         - DB_PASSWD=${DB_PASSWORD}
@@ -35,7 +35,7 @@ services:
         environment:
             MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
             MYSQL_DATABASE: ${DB_DATABASE}
-        # restart: always
+        restart: always
 
     apache:
         image: "httpd:2.4.58-alpine"
@@ -49,7 +49,7 @@ services:
             - ./www/:/var/www/html/
             - ./logs/apache2/:/var/log/apache2/
             - ./config-files/apache2/httpd.conf:/usr/local/apache2/conf/httpd.conf
-        # restart: always
+        restart: always
 
     # SOURCE : https://hub.docker.com/_/phpmyadmin
     # phpmyadmin:
