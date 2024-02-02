@@ -1,10 +1,14 @@
 ## tissusellen_v3
+Clone repository
+TEMPORARY REMOVE WWW (restore it later with git)
+sudo rm -R www
 docker compose up -d
 
-# Fix permissions
-docker compose exec prestashop bash
-chown -R www-data:www-data .
-exit
+
+<!-- docker compose exec prestashop bash
+chown -R www-data:www-data . -->
+<!-- exit -->
+
 
 
 # RESET EVERYTHING
