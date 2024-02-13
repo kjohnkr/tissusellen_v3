@@ -51,6 +51,27 @@ services:
             - ./config-files/apache2/httpd.conf:/usr/local/apache2/conf/httpd.conf
         # restart: always
 
+    ftpd_server:
+        build:
+            context: .
+            dockerfile: ./config-files/ftp/Dockerfile
+        container_name: pure-ftpd
+        ports:
+            - "21:21"
+            - "30000-30009:30000-30009"
+        volumes:
+            - "${PWD}/www:/home/ftp/"
+            - "/home/ftp/docker"
+            - "/home/ftp/db"
+            - "/home/ftp/.git"
+        environment:
+            PUBLICHOST: "localhost"
+            FTP_USER_NAME: ${FTP_USER}
+            FTP_USER_PASS: ${FTP_PASSWORD}
+            FTP_USER_HOME: /home/ftp
+        restart: always
+
+
     # SOURCE : https://hub.docker.com/_/phpmyadmin
     # phpmyadmin:
     #     image: phpmyadmin/phpmyadmin
