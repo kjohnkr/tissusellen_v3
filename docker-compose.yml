@@ -69,6 +69,8 @@ services:
             FTP_USER_NAME: ${FTP_USER}
             FTP_USER_PASS: ${FTP_PASSWORD}
             FTP_USER_HOME: /home/ftp
+            FTP_USER_UID: 33
+            FTP_USER_GID: 33
         restart: always
 
 
