@@ -15,6 +15,9 @@ www/themes/at_auros/assets/*
 !www/themes/at_auros/assets/img
 www/themes/at_auros/assets/img/*
 !www/themes/at_auros/assets/img/modules
+!www/themes/at_auros/assets/js
+www/themes/at_auros/assets/js/*
+!www/themes/at_auros/assets/js/custom.js
 
 !www/themes/at_auros/modules/appagebuilder
 www/themes/at_auros/modules/appagebuilder/*

@@ -29,7 +29,6 @@
         <span class="control-label">{l s='Quantity' d='Shop.Theme.Catalog'}</span>
         <div class="p-cartwapper">
           <div class="qty clearfix">
-            
             <input
             type="number"
               name="qty"
@@ -46,6 +45,10 @@
               class="input-group"
               aria-label="{l s='Quantity' d='Shop.Theme.Actions'}"
             >
+            {if $product.unity}
+              <button class="qty-shortcut btn btn-warning" data-qty="10">1M</button>
+              <button class="qty-shortcut btn btn-warning" data-qty="20">2M</button>
+            {/if}
           </div>
 
           <div class="add">
@@ -63,12 +66,20 @@
               <div class="leo-compare-wishlist-button">
               {hook h='displayProductActions' product=$product}
               {hook h='displayLeoWishlistButton' product=$product}
-              {hook h='displayLeoCompareButton' product=$product}
+              {* {hook h='displayLeoCompareButton' product=$product} *}
+              <div class="compare">
+                <a class="btn-product btn" href="{$urls.pages.contact}?csId={$product.id}&csName={$product.name}" title="{l s='Check stocks description' d='Shop.Theme.Global'}">
+                  <span class="leo-compare-bt-content">
+                    <i class="ti-reload"></i>
+                    <span>{l s='Check stocks' d='Shop.Theme.Global'}</span>
+                  </span>
+                </a>
+              </div>
             </div>
           </div> 
 
         </div>
-
+        
         {block name='product_minimal_quantity'}
           <div class="product-minimal-quantity js-product-minimal-quantity">
             {if $product.minimal_quantity > 1}
@@ -80,6 +91,11 @@
             {/if}
           </div>
         {/block}
+        
+        <div class="mt-2">
+          <a class="product-faq-anchor" href="#product-faq-anchor"><i class="icon-Ico_Support"></i> Tranches de 10 cm ? Laize ? Délais de livraison ? Toutes les réponses ici</a>
+        </div>
+
         {block name='product_availability'}
           <span id="product-availability" class="js-product-availability">
             {if $product.show_availability && $product.availability_message}

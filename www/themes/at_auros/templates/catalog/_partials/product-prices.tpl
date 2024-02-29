@@ -37,14 +37,44 @@
       <div
         class="product-price h5 {if $product.has_discount}has-discount{/if}">
         <div class="current-price">
-          <span class='current-price-value' content="{$product.rounded_display_price}">
+
+          {if $displayUnitPrice}
+            
+            {if $product.unity == '/ mètre'}
+              {* <span itemprop="price" content="{$product.unit_price_full}">{l s='%unit_price%' d='Shop.Theme.Catalog' sprintf=['%unit_price%' => $product.price]} {l s='/ 10cm' d='Shop.Theme.Catalog'}</span> *}
+              {* <span class="secondary-price" itemprop="price" content="{$product.unit_price_full}">({l s='%unit_price%' d='Shop.Theme.Catalog' sprintf=['%unit_price%' => $product.unit_price_full]})</span> *}
+              <span class='current-price-value' content="{$product.price}">
+                {$product.price} {l s='/ 10cm' d='Shop.Theme.Catalog'}
+              </span>
+              <span class='secondary-price' content="{$product.unit_price_full}">
+                {$product.unit_price_full}
+              </span>
+            {else}
+              {* <span itemprop="price" content="{$product.unit_price_full}">{l s='%unit_price%' d='Shop.Theme.Catalog' sprintf=['%unit_price%' => $product.unit_price_full]}</span> *}
+              <span class='current-price-value' content="{$product.unit_price_full}">
+                {$product.unit_price_full}
+              </span>
+            {/if}
+          {else}
+            {* <span itemprop="price" content="{$product.rounded_display_price}">{$product.price} {if $product.unity}{$product.unity}{/if}</span> *}
+            <span class='current-price-value' content="{$product.rounded_display_price}">
             {capture name='custom_price'}{hook h='displayProductPriceBlock' product=$product type='custom_price' hook_origin='product_sheet'}{/capture}
             {if '' !== $smarty.capture.custom_price}
               {$smarty.capture.custom_price nofilter}
             {else}
               {$product.price}
             {/if}
-          </span>
+            </span>
+          {/if}
+
+          {* <span class='current-price-value' content="{$product.rounded_display_price}">
+            {capture name='custom_price'}{hook h='displayProductPriceBlock' product=$product type='custom_price' hook_origin='product_sheet'}{/capture}
+            {if '' !== $smarty.capture.custom_price}
+              {$smarty.capture.custom_price nofilter}
+            {else}
+              {$product.price}
+            {/if}
+          </span> *}
 
           {if $product.has_discount}
             {if $product.discount_type === 'percentage'}
@@ -57,11 +87,11 @@
           {/if}
         </div>
 
-        {block name='product_unit_price'}
+        {* {block name='product_unit_price'}
           {if $displayUnitPrice}
             <p class="product-unit-price sub">{$product.unit_price_full}</p>
           {/if}
-        {/block}
+        {/block} *}
       </div>
     {/block}
 
