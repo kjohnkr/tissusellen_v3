@@ -15,31 +15,31 @@
 	  <img
 		class="img-fluid lazyOwl"
 		src = ""
-		data-src = "{$product.cover.bySize.home_default.url}"
+		data-src = "{$product.cover.bySize.medium_default.url}"
 		alt = "{$product.cover.legend}"
 		data-full-size-image-url = "{$product.cover.large.url}"
 	  >
 	  {if isset($cfg_product_one_img) && $cfg_product_one_img}
-		<span class="product-additional" data-idproduct="{$product.id_product}"></span>
+		<span class="product-additional" data-idproduct="{$product.id_product}" data-image-type="medium_default"></span>
 	  {/if}
 	</a> 
     {else}
 	<a href="{$product.url}" class="thumbnail product-thumbnail">
 	  <img
 		class="img-fluid"
-		src = "{$product.cover.bySize.home_default.url}"
+		src = "{$product.cover.bySize.medium_default.url}"
 		alt = "{$product.cover.legend}"
 		data-full-size-image-url = "{$product.cover.large.url}"
 	  >
 	  {if isset($cfg_product_one_img) && $cfg_product_one_img}
-		<span class="product-additional" data-idproduct="{$product.id_product}"></span>
+		<span class="product-additional" data-idproduct="{$product.id_product}" data-image-type="medium_default"></span>
 	  {/if}
 	</a>
     {/if}
 {else}
   <a href="{$product.url}" class="thumbnail product-thumbnail leo-noimage">
  <img
-   src = "{$urls.no_picture_image.bySize.home_default.url}"
+   src = "{$urls.no_picture_image.bySize.medium_default.url}"
  >
   </a>
 {/if}

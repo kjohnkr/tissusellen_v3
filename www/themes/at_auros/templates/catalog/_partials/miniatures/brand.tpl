@@ -29,7 +29,7 @@
       <p><a href="{$brand.url}">{$brand.name}</a></p>
       {$brand.text nofilter}
     </div>
-    <div class="brand-products col-xl-5 col-lg-5 col-xs-12">
+    <div class="brand-products">
       <a href="{$brand.url}">{$brand.nb_products}</a>
       <a href="{$brand.url}" class="btn btn-outline float-md-right text-xs-center">{l s='View products' d='Shop.Theme.Actions'}</a>
     </div>

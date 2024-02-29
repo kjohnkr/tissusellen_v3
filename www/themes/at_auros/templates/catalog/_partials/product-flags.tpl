@@ -1,5 +1,5 @@
 {**
- *  9 PrestaShop and Contributors
+ *   PrestaShop and Contributors
  *
  * NOTICE OF LICENSE
  *

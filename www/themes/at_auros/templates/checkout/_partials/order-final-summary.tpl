@@ -75,17 +75,20 @@
               {/if}
             </div>
           </div>
-          <div class="col-md-3">
+          <div class="col-md-4">
             <span class="carrier-name">{$selected_delivery_option.name}</span>
           </div>
-          <div class="col-md-3">
+          <div class="col-md-4">
             <span class="carrier-delay">{$selected_delivery_option.delay}</span>
           </div>
-          <div class="col-md-4">
+          <div class="col-md-2">
             <span class="carrier-price">{$selected_delivery_option.price}</span>
           </div>
         </div>
       </div>
+        {if $is_recyclable_packaging}
+          <em>{l s='You have given permission to receive your order in recycled packaging.' d="Shop.Theme.Customeraccount"}</em>
+        {/if}
     </div>
   </div>
 {/if}

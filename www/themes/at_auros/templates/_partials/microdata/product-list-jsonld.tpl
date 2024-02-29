@@ -1,5 +1,5 @@
 {**
- * Copyright since 2007 PrestaShop SA and Contributors
+ * Copyright since  PrestaShop SA and Contributors
  * PrestaShop is an International Registered Trademark & Property of PrestaShop SA
  *
  * NOTICE OF LICENSE
@@ -19,7 +19,7 @@
  * needs please refer to https://devdocs.prestashop.com/ for more information.
  *
  * @author    PrestaShop SA and Contributors <contact@prestashop.com>
- * @copyright Since 2007 PrestaShop SA and Contributors
+ * @copyright Since  PrestaShop SA and Contributors
  * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License 3.0 (AFL-3.0)
  *}
 <script type="application/ld+json">
@@ -27,10 +27,10 @@
     "@context": "https://schema.org",
     "@type": "ItemList",
     "itemListElement": [
-    {foreach from=$listing.products item=item key="position" name=productsForJsonLd}
+    {foreach from=$listing.products item=item name=productsForJsonLd}
       {
         "@type": "ListItem",
-        "position": {$position},
+        "position": {$smarty.foreach.productsForJsonLd.iteration},
         "name": "{$item.name}",
         "url": "{$item.url}"
       }{if !$smarty.foreach.productsForJsonLd.last},{/if}

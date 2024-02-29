@@ -52,10 +52,10 @@
     {hook h='displayLeoProfileProduct' product=$product typeProduct='detail'}
   {else}
 
-    <section id="main">
-      <meta content="{$product.url}">
+ <section id="main" class="product-detail">
+    <meta content="{$product.url}">
 
-      <div class="row product-container js-product-container">
+      <div class="row product-container  js-product-container">
         <div class="col-md-6">
           {block name='page_content_container'}
             <section class="page-content" id="content">

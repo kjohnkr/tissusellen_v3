@@ -1,5 +1,5 @@
 {**
- * Copyright since 2007 PrestaShop SA and Contributors
+ * Copyright since  PrestaShop SA and Contributors
  * PrestaShop is an International Registered Trademark & Property of PrestaShop SA
  *
  * NOTICE OF LICENSE
@@ -19,7 +19,7 @@
  * needs please refer to https://devdocs.prestashop.com/ for more information.
  *
  * @author    PrestaShop SA and Contributors <contact@prestashop.com>
- * @copyright Since 2007 PrestaShop SA and Contributors
+ * @copyright Since  PrestaShop SA and Contributors
  * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License 3.0 (AFL-3.0)
  *}
 {assign var=hasAggregateRating value=false}
@@ -53,7 +53,7 @@
     {/if}
     {if $product_manufacturer->name OR $shop.name},
     "brand": {
-      "@type": "Thing",
+      "@type": "Brand",
       "name": "{if $product_manufacturer->name}{$product_manufacturer->name|escape:'html':'UTF-8'}{else}{$shop.name}{/if}"
     }
     {/if}

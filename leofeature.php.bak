@@ -1,0 +1,113 @@
+<?php
+/**
+ * 2007-2015 Leotheme
+ *
+ * NOTICE OF LICENSE
+ *
+ * Leo feature for prestashop 1.7: ajax cart, review, compare, wishlist at product list
+ *
+ * DISCLAIMER
+ *
+ *  @author    leotheme <leotheme@gmail.com>
+ *  @copyright 2007-2015 Leotheme
+ *  @license   http://leotheme.com - prestashop template provider
+ */
+if (!defined('_PS_VERSION_')) {
+    exit;
+}
+class LeofeatureOverride extends Leofeature
+{
+    private $link;
+    public function hookdisplayLeoCartButton($params)
+    {
+        if (!Configuration::isCatalogMode()) {
+            if (Configuration::get('LEOFEATURE_ENABLE_AJAXCART')) {
+                $ssl = Configuration::get('PS_SSL_ENABLED') && Configuration::get('PS_SSL_ENABLED_EVERYWHERE');
+                $this->link_cart = $this->context->link->getPageLink('cart', $ssl);
+                $product = $params['product'];
+                # FIX 1.7.5.0
+                if (is_object($product) && method_exists($product, 'jsonSerialize')) {
+                    $product = $product->jsonSerialize();
+                }
+                $id_product = $product['id_product'];
+                if ($this->shouldEnableAddToCartButton($product)) {
+                    $product['add_to_cart_url'] = $this->getAddToCartURL($product);
+                } else {
+                    $product['add_to_cart_url'] = null;
+                }
+                if ($product['customizable']) {
+                    $customization_datas = $this->context->cart->getProductCustomization($id_product, null, true);
+                }
+                $product['id_customization'] = empty($customization_datas) ? null : $customization_datas[0]['id_customization'];
+                if (!isset($product['product_attribute_minimal_quantity'])) {
+                    $product['product_attribute_minimal_quantity'] = Attribute::getAttributeMinimalQty($product['id_product_attribute']);
+                }
+                if (Shop::isFeatureActive()) {
+                    $idShop = (int) Context::getContext()->shop->id;
+                } else {
+                    $idShop = 1;
+                }
+                $dimension_data = Db::getInstance()->executeS('SELECT *
+                        FROM `' . bqSQL(_DB_PREFIX_) . 'squaremeteradmin` pa
+                        WHERE pa.`id_product` = ' . (int) $id_product . ' AND
+                        pa.`id_shop` = ' . (int) $idShop);
+                $templateVars = array(
+                    'static_token' => Tools::getToken(false),
+                    'leo_cart_product' => $product,
+                    'dimension_data' => $dimension_data,
+                    'link_cart' => $this->link_cart,
+                    'show_input_quantity' => 0, // FIX SOME CUSTOMER GET BUG - undefined index: show_input_quantity
+                );
+                $this->context->smarty->assign($templateVars);
+                return $this->display(__FILE__, 'leo_cart_button.tpl');
+            }
+        }
+    }
+    private function getAddToCartURL(array $product)
+    {
+        $this->link = $this->context->link;
+        return $this->link->getAddToCartURL($product['id_product'], $product['id_product_attribute']);
+    }
+    public function renderDropDown($only_total)
+    {
+        $cart_products = (new CartPresenter)->present($this->context->cart)['products'];
+        $index = Configuration::get('WD_CUSTOMIZATION_INDEX');
+        $customization_added_to_cart = [];
+        $dimension_data = [];
+        if (!$shop) {
+            $shop = Context::getContext()->shop;
+        }
+        foreach ($cart_products as $product) {
+            $id_product = $product['id'];
+            $id_customization = $product['customizations'][0]['id_customization'];
+            $customization_added_to_cart[$id_product] = Db::getInstance()->executeS('SELECT *
+            FROM `' . bqSQL(_DB_PREFIX_) . 'customized_data`
+            WHERE `id_customization` = ' . (int) $id_customization);
+            $dimension_data[$id_product] = Db::getInstance()->executeS('SELECT *
+            FROM `' . bqSQL(_DB_PREFIX_) . 'squaremeteradmin` pa
+            WHERE pa.`id_product` = ' . (int) $id_product . ' AND
+            pa.`id_shop` = ' . (int) $shop->id);
+        }
+        $cart = (new CartPresenter)->present($this->context->cart);
+        $drop_down_html = '';
+        if ($cart['products_count'] > 0) {
+            $templateVars = array(
+                'customization_added_to_cart' => $customization_added_to_cart,
+                'dimension_data' => $dimension_data,
+                'only_total' => $only_total,
+                'cart' => $cart,
+                'cart_url' => $this->context->link->getPageLink('cart', null, $this->context->language->id, array('action' => 'show'), false, null, true),
+                'order_url' => $this->context->link->getPageLink('order'),
+                'enable_update_quantity' => (int) Configuration::get('LEOFEATURE_ENABLE_UPDATE_QUANTITY_ALLCART'),
+                'enable_button_quantity' => (int) Configuration::get('LEOFEATURE_ENABLE_BUTTON_QUANTITY_ALLCART'),
+                'show_combination' => (int) Configuration::get('LEOFEATURE_SHOW_COMBINATION_ALLCART'),
+                'show_customization' => (int) Configuration::get('LEOFEATURE_SHOW_CUSTOMIZATION_ALLCART'),
+                'width_cart_item' => Configuration::get('LEOFEATURE_WIDTH_CARTITEM_ALLCART'),
+                'height_cart_item' => Configuration::get('LEOFEATURE_HEIGHT_CARTITEM_ALLCART'),
+            );
+            $this->smarty->assign($templateVars);
+            $drop_down_html = $this->fetch('module:leofeature/views/templates/front/drop_down.tpl');
+        }
+        return $drop_down_html;
+    }
+}

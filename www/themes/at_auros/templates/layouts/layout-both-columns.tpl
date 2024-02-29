@@ -44,9 +44,11 @@
         {include file='catalog/_partials/product-activation.tpl'}
       {/block}
       <header id="header">
+      	<div class="header-container">
           {block name='header'}
             {include file='_partials/header.tpl'}
           {/block}
+	</div>
       </header>
       {block name='notifications'}
         {include file='_partials/notifications.tpl'}
@@ -63,7 +65,7 @@
             {block name="left_column"}
               <div id="left-column" class="sidebar col-xs-12 col-sm-12 col-md-4 col-lg-3">
                 {if $page.page_name == 'product'}
-                  {hook h='displayLeftColumnProduct'}
+                  {hook h='displayLeftColumnProduct' product=$product category=$category}
                 {else}
                   {hook h="displayLeftColumn"}
                 {/if}
@@ -71,8 +73,8 @@
             {/block}
 
             {block name="content_wrapper"}
-              <div id="content-wrapper" class="js-content-wrapper left-column right-column col-sm-4 col-md-6">
-		{hook h="displayContentWrapperTop"}
+              <div id="content-wrapper" class="js-content-wrapper left-column right-column col-md-4 col-lg-3">
+                {hook h="displayContentWrapperTop"}
                 {block name="content"}
                   <p>Hello world! This is HTML5 Boilerplate.</p>
                 {/block}
@@ -111,6 +113,7 @@
     </main>
 
     {block name='javascript_bottom'}
+      {include file="_partials/password-policy-template.tpl"}
       {include file="_partials/javascript.tpl" javascript=$javascript.bottom}
     {/block}
 

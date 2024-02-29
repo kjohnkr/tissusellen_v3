@@ -1,6 +1,6 @@
 <?php
 /**
- *  7 PrestaShop
+ *  PrestaShop
  *
  * NOTICE OF LICENSE
  *

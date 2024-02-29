@@ -19,20 +19,26 @@
  * needs please refer to https://devdocs.prestashop.com/ for more information.
  *
  * @author    PrestaShop SA and Contributors <contact@prestashop.com>
- * @copyright Since 2007 PrestaShop SA and Contributors
+ * @copyright  PrestaShop SA and Contributors
  * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License 3.0 (AFL-3.0)
  *}
 {if !empty($subcategories)}
-  {if (isset($display_subcategories) && $display_subcategories eq 1) || !isset($display_subcategories) }
+  {if isset($LEO_SUBCATEGORY) && $LEO_SUBCATEGORY && ((isset($display_subcategories) && $display_subcategories eq 1) || !isset($display_subcategories)) }
     <div id="subcategories">
       <div class="row subcategories-list">
         {foreach from=$subcategories item=subcategory}
           <div class="subcategory-block subcategories-list col-xl-4 col-lg-4 col-md-6 col-sm-6 col-xs-6 col-sp-12">
             <div class="subcategory-image">
-              <a href="{$link->getCategoryLink($subcategory.id_category, $subcategory.link_rewrite)|escape:'html':'UTF-8'}" title="{$subcategory.name|escape:'html':'UTF-8'}" class="img">
+               <a href="{$subcategory.url}" title="{$subcategory.name|escape:'html':'UTF-8'}" class="img">
                 {if !empty($subcategory.image.large.url)}
-                  <img class="replace-2x" src="{$subcategory.image.large.url}" alt="{$subcategory.name|escape:'html':'UTF-8'}" loading="lazy"/>
-                {/if}
+                   <img
+                    class="img-fluid"
+                    src="{$subcategory.image.large.url}"
+                    alt="{$subcategory.name|escape:'html':'UTF-8'}"
+                    loading="lazy"
+                    width="{$subcategory.image.large.width}"
+                    height="{$subcategory.image.large.height}"/>                
+		    {/if}
               </a>
             </div>
             <div class="subcategory-meta">

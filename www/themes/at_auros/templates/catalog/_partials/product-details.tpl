@@ -61,12 +61,14 @@
     {if $product.grouped_features}
       <section class="product-features">
         <p class="h6">{l s='Data sheet' d='Shop.Theme.Catalog'}</p>
-        <dl class="data-sheet">
+        <ul class="data-sheet">
           {foreach from=$product.grouped_features item=feature}
-            <dt class="name">{$feature.name}</dt>
-            <dd class="value">{$feature.value|escape:'htmlall'|nl2br nofilter}</dd>
+	  <li>
+            <span class="name">{$feature.name}</span>
+            <span class="value">{$feature.value|escape:'htmlall'|nl2br nofilter}</span>
+	  </li>
           {/foreach}
-        </dl>
+        </ul>
       </section>
     {/if}
   {/block}

@@ -1,5 +1,4 @@
 {**
- *  PrestaShop
  *
  * NOTICE OF LICENSE
  *
