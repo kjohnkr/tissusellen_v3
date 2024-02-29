@@ -25,7 +25,7 @@
 <div class="product-add-to-cart js-product-add-to-cart">
   {if !$configuration.is_catalog}
     {block name='product_quantity'}
-      <div class="product-quantity clearfix">
+      <div class="product-quantity clearfix {if $product.unity}unit-product{/if}">
         <span class="control-label">{l s='Quantity' d='Shop.Theme.Catalog'}</span>
         <div class="p-cartwapper">
           <div class="qty clearfix">
@@ -91,7 +91,7 @@
             {/if}
           </div>
         {/block}
-        
+
         <div class="mt-2">
           <a class="product-faq-anchor" href="#product-faq-anchor"><i class="icon-Ico_Support"></i> Tranches de 10 cm ? Laize ? Délais de livraison ? Toutes les réponses ici</a>
         </div>
