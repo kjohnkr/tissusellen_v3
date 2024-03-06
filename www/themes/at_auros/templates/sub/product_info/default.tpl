@@ -16,9 +16,9 @@
 	<div id="product-details" data-product="{$product.embedded_attributes|json_encode}">
 		<h4 class="title-info-product">{l s='Product Details' d='Shop.Theme.Catalog'}</h4>
 	  	{block name='product_reference'}
-		    {if isset($product_manufacturer->id)}
+		    {if !empty($product_manufacturer->id)}
 		      	<div class="product-manufacturer">
-			        {if isset($manufacturer_image_url)}
+			        {if !empty($manufacturer_image_url)}
 			          	<a href="{$product_brand_url}">
 			            	<img src="{$manufacturer_image_url}" class="img img-thumbnail manufacturer-logo" />
 			          	</a>
@@ -30,7 +30,7 @@
 			        {/if}
 		      	</div>
 		    {/if}
-		    {if isset($product.reference_to_display)}
+		    {if !empty($product.reference_to_display)}
 		      	<div class="product-reference">
 			        <label class="label">{l s='Reference' d='Shop.Theme.Catalog'} </label>
 			        <span itemprop="sku">{$product.reference_to_display}</span>
@@ -75,7 +75,7 @@
 	    {/block}
 	    {* if product have specific references, a table will be added to product details section *}
 	    {block name='product_specific_references'}
-	      	{if isset($product.specific_references)}
+	      	{if !empty($product.specific_references)}
 		        <section class="product-features">
 		          	<h3 class="h6">{l s='Specific References' d='Shop.Theme.Catalog'}</h3>
 		            <dl class="data-sheet">
