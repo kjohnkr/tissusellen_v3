@@ -1,0 +1,613 @@
+<?php
+/**
+ * Copyright since 2007 PrestaShop SA and Contributors
+ * PrestaShop is an International Registered Trademark & Property of PrestaShop SA
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Open Software License (OSL 3.0)
+ * that is bundled with this package in the file LICENSE.md.
+ * It is also available through the world-wide-web at this URL:
+ * https://opensource.org/licenses/OSL-3.0
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to license@prestashop.com so we can send you a copy immediately.
+ *
+ * DISCLAIMER
+ *
+ * Do not edit or add to this file if you wish to upgrade PrestaShop to newer
+ * versions in the future. If you wish to customize PrestaShop for your
+ * needs please refer to https://devdocs.prestashop.com/ for more information.
+ *
+ * @author    PrestaShop SA and Contributors <contact@prestashop.com>
+ * @copyright Since 2007 PrestaShop SA and Contributors
+ * @license   https://opensource.org/licenses/OSL-3.0 Open Software License (OSL 3.0)
+ */
+if (!defined('_PS_VERSION_')) {
+    exit;
+}
+class Cart extends CartCore
+{
+    public function updateQty(
+        $quantity,
+        $id_product,
+        $id_product_attribute = null,
+        $id_customization = false,
+        $operator = 'up',
+        $id_address_delivery = 0,
+        Shop $shop = null,
+        $auto_add_cart_rule = true,
+        $skipAvailabilityCheckOutOfStock = false,
+        bool $preserveGiftRemoval = true,
+        bool $useOrderPrices = false
+    ) {
+        if (!$shop) {
+            $shop = Context::getContext()->shop;
+        }
+
+        if (Validate::isLoadedObject(Context::getContext()->customer)) {
+            if ($id_address_delivery == 0 && (int) $this->id_address_delivery) {
+                // The $id_address_delivery is null, use the cart delivery address
+                $id_address_delivery = $this->id_address_delivery;
+            } elseif ($id_address_delivery == 0) {
+                // The $id_address_delivery is null, get the default customer address
+                $id_address_delivery = (int) Address::getFirstCustomerAddressId(
+                    (int) Context::getContext()->customer->id
+                );
+            } elseif (!Customer::customerHasAddress(Context::getContext()->customer->id, $id_address_delivery)) {
+                // The $id_address_delivery must be linked with customer
+                $id_address_delivery = 0;
+            }
+        } else {
+            $id_address_delivery = 0;
+        }
+        $id_product = (int) $id_product;
+        $id_product_attribute = (int) $id_product_attribute;
+        $product = new Product($id_product, false, Configuration::get('PS_LANG_DEFAULT'), $shop->id);
+        if ($id_product_attribute) {
+            $combination = new Combination((int) $id_product_attribute);
+            if ($combination->id_product != $id_product) {
+                return false;
+            }
+        }
+        if (!empty($id_product_attribute)) {
+            $minimal_quantity = (int) $this->getAttributeMinimalQty($id_product_attribute);
+        } else {
+            $minimal_quantity = (int) $product->minimal_quantity;
+        }
+        if (!Validate::isLoadedObject($product)) {
+            die(Tools::displayError());
+        }
+        if (isset(self::$_nbProducts[$this->id])) {
+            unset(self::$_nbProducts[$this->id]);
+        }
+        if (isset(self::$_totalWeight[$this->id])) {
+            unset(self::$_totalWeight[$this->id]);
+        }
+        $cartProductQuantity = parent::getProductQuantity(
+            $id_product,
+            $id_product_attribute,
+            $id_customization,
+            $id_address_delivery
+        );
+        $index = Configuration::get('WD_CUSTOMIZATION_INDEX');
+        $customization_added_to_cart = Db::getInstance()->executeS('SELECT *
+            FROM `' . bqSQL(_DB_PREFIX_) . 'customized_data`
+            WHERE `id_customization` = ' . (int) $id_customization . ' AND `index` = ' . (int) $index);
+        if (!$shop) {
+            $shop = Context::getContext()->shop;
+        }
+        $dimension_data = Db::getInstance()->executeS('SELECT *
+            FROM `' . bqSQL(_DB_PREFIX_) . 'squaremeteradmin` pa
+            WHERE pa.`id_product` = ' . (int) $id_product . ' AND
+            pa.`id_shop` = ' . (int) $shop->id);
+        if (isset($dimension_data[0]['displaycalculator'])) {
+            $displaycalculator = $dimension_data[0]['displaycalculator'];
+        } else {
+            $displaycalculator = 0;
+        }
+        if ($displaycalculator != 1) { //if display combinations module is used add || empty($customization_added_to_cart) to the if clause
+            parent::updateQty(
+                $quantity,
+                $id_product,
+                $id_product_attribute,
+                $id_customization,
+                $operator,
+                $id_address_delivery,
+                $shop,
+                $auto_add_cart_rule,
+                $skipAvailabilityCheckOutOfStock,
+                $preserveGiftRemoval,
+                $useOrderPrices
+            );
+            return true;
+        } else {
+            if (($dimension_data) && ($dimension_data[0]['displayquantity'] == 'decimalok')) {
+                $quantity = $quantity;
+            } else {
+                $quantity = (int) $quantity;
+            }
+
+            $data = array(
+                'cart' => $this,
+                'product' => $product,
+                'id_product_attribute' => $id_product_attribute,
+                'id_customization' => $id_customization,
+                'quantity' => $quantity,
+                'operator' => $operator,
+                'id_address_delivery' => $id_address_delivery,
+                'shop' => $shop,
+                'auto_add_cart_rule' => $auto_add_cart_rule,
+            );
+            Hook::exec('actionCartUpdateQuantityBefore', $data);
+            if (Tools::getValue('cartsource')) {
+                $suffix = '_' . Tools::getValue('id_product');
+            } else {
+                $suffix = '';
+            }
+            if ($dimension_data) {
+                $qty_type = (($dimension_data[0]['displayquantity'] == 'decimalok') || ($dimension_data[0]['displayquantity'] == 'calcvisible') || ($dimension_data[0]['displayquantity'] == 'calcinvisible')) ? 'qty_type_float' : 'qty_type_integer';
+                $calculation_type = $dimension_data[0]['calculationtype'];
+                if ($dimension_data[0]['step'] == 0) {
+                    $dimension_data[0]['step'] = 0.1;
+                }
+                if (($calculation_type == 'weight') && (!$dimension_data[0]['step'])) {
+                    $dimension_data[0]['step'] = 0.1;
+                }
+            }
+            if (isset($calculation_type)) {
+                $minimum_customization_quantity = 0;
+            }
+            if ((float) $quantity <= 0) {
+                if ((_PS_VERSION_ >= '1.7.0.0') && (_PS_VERSION_ < '1.7.7.0')) {
+                    return parent::deleteProduct((int) $id_product, (int) $id_product_attribute, (int) $id_customization);
+                } elseif (_PS_VERSION_ >= '1.7.7.0') {
+                    return parent::deleteProduct((int) $id_product, (int) $id_product_attribute, (int) $id_customization, (int) $id_address_delivery, $preserveGiftRemoval);
+                }
+            }
+            if (!$product->available_for_order
+                || (Configuration::isCatalogMode()
+                    && !defined('_PS_ADMIN_DIR_'))
+            ) {
+                return false;
+            }
+            if (empty(Tools::getValue('discretion')) && Tools::getValue('dim' . $suffix) && $id_customization) {
+                $id_customization = 0;
+            } elseif (Tools::getValue('discretion') && Tools::getValue('dim' . $suffix) && $id_customization) {
+                $cartProductQuantity = parent::getProductQuantity(
+                    $id_product,
+                    $id_product_attribute,
+                    (int) $id_customization,
+                    (int) $id_address_delivery
+                );
+                if (!empty($cartProductQuantity['quantity'])) {
+                    $sql = 'select id_customization from ' . bqSQL(_DB_PREFIX_) . 'customized_data ORDER BY id_customization DESC LIMIT 1';
+                    $latestcustomization = Db::getInstance()->executeS($sql);
+                    $id_customization = $latestcustomization[0]['id_customization'];
+                    $id_customization = $id_customization + 1;
+                }
+            }
+            $cartProductQuantity = parent::getProductQuantity(
+                $id_product,
+                $id_product_attribute,
+                (int) $id_customization,
+                (int) $id_address_delivery
+            );
+
+/* Cart Aggregation */
+            $cart_products = parent::getProducts();
+            foreach ($cart_products as $p) {
+                if (($p['id_product'] == $id_product) && ($p['id_product_attribute'] == $id_product_attribute)) {
+                    $quantity_to_update = parent::containsProduct($id_product, $id_product_attribute, $p['id_customization'], $p['id_address_delivery']);
+                    if (is_array($quantity_to_update)) {
+                        $quantity_to_update = $quantity_to_update['quantity'];
+                    }
+                    $id_customization_temp = $p['id_customization'];
+                }
+            }
+            if (Shop::isFeatureActive()) {
+                $idShop = (int) Context::getContext()->shop->id;
+                $idShopGroup = Shop::getContextShopGroupID(true);
+                $cart_aggregation = Configuration::get('squaremeter_cartaggregation', null, $idShopGroup, $idShop);
+            } else { // Default behavior
+                $cart_aggregation = Configuration::get('squaremeter_cartaggregation');
+            }
+            if (isset($quantity_to_update) && ($quantity_to_update > 0)) {
+                if (($displaycalculator == 1)
+                    && ($cart_aggregation == 'on')
+                    && ($operator == 'up')
+                    && (empty($cartProductQuantity['quantity']))) {
+                    $id_customization = $id_customization_temp;
+                    $cartProductQuantity = parent::getProductQuantity(
+                        $id_product,
+                        $id_product_attribute,
+                        (int) $id_customization,
+                        (int) $id_address_delivery
+                    );
+                }
+            }
+/* Cart Aggregation */
+            if (!empty($cartProductQuantity['quantity'])) {
+                if (($dimension_data) && ($qty_type == 'qty_type_float')) {
+                    $customization_added_to_cart = Db::getInstance()->executeS('SELECT *
+                        FROM `' . bqSQL(_DB_PREFIX_) . 'customized_data`
+                        WHERE `id_customization` = ' . (int) $id_customization . ' AND `index` = ' . (int) $index);
+                    if ($customization_added_to_cart) {
+                        $oldProductQuantity = $customization_added_to_cart[0]['converted_ea'];
+                        $oldTotalDimension = $customization_added_to_cart[0]['total_dimension'];
+                    }
+                }
+                $productQuantity = Product::getQuantity($id_product, $id_product_attribute, null, $this); //Available quantity
+                $availableOutOfStock = Product::isAvailableWhenOutOfStock(StockAvailable::outOfStock($product->id));
+                if ($operator == 'up') {
+                    $updateQuantity = '+ ' . $quantity; //+ 1
+                    if (($dimension_data) && ($qty_type == 'qty_type_float')) {
+                        if (($dimension_data[0]['displayquantity'] == 'calcvisible') || ($dimension_data[0]['displayquantity'] == 'calcinvisible')) {
+                            $newProductQuantity = $productQuantity - $quantity; //This will be the new stock available
+                            $newDimensionQuantity = $cartProductQuantity['quantity'] + $quantity;
+                        } else {
+                            $newProductQuantity = $productQuantity - $dimension_data[0]['step'];
+                            if (empty($customization_added_to_cart)) {
+                                $customization_added_to_cart[0]['total_dimension'] = 0;
+                            }
+                            $newDimensionQuantity = $customization_added_to_cart[0]['total_dimension'] + $dimension_data[0]['step'];
+                        }
+                    } else {
+                        $newProductQuantity = $productQuantity - $quantity;
+                    }
+                    if ($newProductQuantity < 0 && !$availableOutOfStock && !$skipAvailabilityCheckOutOfStock) {
+                        return false;
+                    }
+                } elseif ($operator == 'down') {
+                    $cartFirstLevelProductQuantity = parent::getProductQuantity(
+                        (int) $id_product,
+                        (int) $id_product_attribute,
+                        $id_customization
+                    );
+                    $updateQuantity = '- ' . $quantity;
+                    if (($dimension_data) && ($qty_type == 'qty_type_float')) {
+                        if (($dimension_data[0]['displayquantity'] == 'calcvisible') || ($dimension_data[0]['displayquantity'] == 'calcinvisible')) {
+                            $newProductQuantity = $productQuantity + $quantity;
+                            $newDimensionQuantity = $cartProductQuantity['quantity'] - $quantity;
+                        } else {
+                            if (!empty($customization_added_to_cart)) {
+                                $custom_total_dimension = $customization_added_to_cart[0]['total_dimension'];
+                            } else {
+                                $custom_total_dimension = 0;
+                            }
+                            $newProductQuantity = $custom_total_dimension + $dimension_data[0]['step'];
+                            $newDimensionQuantity = $custom_total_dimension - $dimension_data[0]['step'];
+                        }
+                    } else {
+                        $newProductQuantity = $productQuantity + $quantity;
+                    }
+                    if (($dimension_data) && ($qty_type == 'qty_type_float') && (($dimension_data[0]['displayquantity'] != 'calcvisible') && ($dimension_data[0]['displayquantity'] != 'calcinvisible'))) {
+                        if (($newProductQuantity < $minimum_customization_quantity) || ($newDimensionQuantity <= 0)) {
+                            if ((_PS_VERSION_ >= '1.7.0.0') && (_PS_VERSION_ < '1.7.7.0')) {
+                                return parent::deleteProduct((int) $id_product, (int) $id_product_attribute, (int) $id_customization);
+                            } elseif (_PS_VERSION_ >= '1.7.7.0') {
+                                return parent::deleteProduct((int) $id_product, (int) $id_product_attribute, (int) $id_customization, (int) $id_address_delivery, $preserveGiftRemoval);
+                            }
+                        }
+                    } else {
+                        if ($cartFirstLevelProductQuantity['quantity'] <= 1
+                            || $cartProductQuantity['quantity'] - $quantity <= 0) {
+                            if ((_PS_VERSION_ >= '1.7.0.0') && (_PS_VERSION_ < '1.7.7.0')) {
+                                return parent::deleteProduct((int) $id_product, (int) $id_product_attribute, (int) $id_customization);
+                            } elseif (_PS_VERSION_ >= '1.7.7.0') {
+                                return parent::deleteProduct((int) $id_product, (int) $id_product_attribute, (int) $id_customization, (int) $id_address_delivery, $preserveGiftRemoval);
+                            }
+                        }
+                    }
+                } else {
+                    return false;
+                }
+                if (($displaycalculator == 1)
+                    && (($id_customization == 0) || !isset($id_customization))) {
+                    $unitpricewithdimension = 1;
+                } else {
+                    $unitpricewithdimension = 0;
+                }
+                if (($dimension_data) && ($qty_type == 'qty_type_float') && ($unitpricewithdimension != 1)) {
+                    if ($dimension_data[0]['displaystartingprice'] == null) {
+                        $dimension_data[0]['displaystartingprice'] = 0;
+                    }
+                    if ($dimension_data[0]['displayreserve'] == null) {
+                        $dimension_data[0]['displayreserve'] = 0;
+                    }
+                    if (empty($customization_added_to_cart)) {
+                        $customization_added_to_cart[0]['extra_fee'] = 0;
+                    }
+                    if ($customization_added_to_cart[0]['extra_fee'] == null) {
+                        $customization_added_to_cart[0]['extra_fee'] = 0;
+                    }
+                    if ((!isset($oldProductQuantity)) || ($oldProductQuantity == 0)) {
+                        $oldProductQuantity = 1;
+                    }
+                    if ((!isset($oldTotalDimension)) || ($oldTotalDimension == 0)) {
+                        $oldTotalDimension = 1;
+                    }
+                    if (empty($customization_added_to_cart)) {
+                        $customization_added_to_cart[0]['price'] = 0;
+                    }
+                    $old_price = (float) $customization_added_to_cart[0]['price'] - (float) $dimension_data[0]['displaystartingprice'] - (float) $customization_added_to_cart[0]['extra_fee'];
+                    $old_unit_price = round(($old_price / $oldProductQuantity), 2);
+                    if (empty($customization_added_to_cart)) {
+                        $customization_added_to_cart[0]['grand_total_dimension'] = 0;
+                        $customization_added_to_cart[0]['converted_ea'] = 0;
+                    }
+                    if ($customization_added_to_cart[0]['grand_total_dimension'] != 0) {
+                        $conversion_rate = round(($customization_added_to_cart[0]['converted_ea'] / $customization_added_to_cart[0]['grand_total_dimension']), 2);
+                        $newGrandTotalDimension = round((($newDimensionQuantity * $customization_added_to_cart[0]['grand_total_dimension']) / $oldProductQuantity), 2);
+                        $newConvertedEa = $newDimensionQuantity;
+                        $newDimensionQuantity = $newGrandTotalDimension;
+                    } else {
+                        $newGrandTotalDimension = 0;
+                        $newConvertedEa = round((($newDimensionQuantity * $oldProductQuantity) / $oldTotalDimension), 2);
+                    }
+                    $new_price = $newConvertedEa * $old_unit_price + (float) $dimension_data[0]['displaystartingprice'] + (float) $customization_added_to_cart[0]['extra_fee'];
+                    if ($dimension_data[0]['displayreserve'] > $new_price) {
+                        $new_price = $dimension_data[0]['displayreserve'];
+                    }
+                    if (($dimension_data[0]['displayquantity'] == 'calcvisible') || ($dimension_data[0]['displayquantity'] == 'calcinvisible')) {
+                        $update = '`quantity` ' . $updateQuantity;
+                        $new_dimension_text = '(Total ' . $newDimensionQuantity . ' ' . $dimension_data[0]['conversionunit'] . ')';
+                    } else {
+                        $new_dimension_text = '(Total ' . $newDimensionQuantity . ' ' . $dimension_data[0]['conversionunit'] . ')';
+                        $update = $quantity;
+                        if ($update < 1) {
+                            $update = 1;
+                        }
+                    }
+                    Db::getInstance()->execute(
+                        'UPDATE `' . bqSQL(_DB_PREFIX_) . 'customized_data`
+                        SET `price` = ' . (float) $new_price . ',
+                            `value` = "' . pSQL($new_dimension_text) . '",
+                            `total_dimension` = ' . (float) $newDimensionQuantity . ',
+                            `grand_total_dimension` = ' . (float) $newGrandTotalDimension . ',
+                            `converted_ea` = ' . (float) $newConvertedEa . '
+                            WHERE `id_customization` = ' . (int) $id_customization . ' AND `index` = ' . (int) $index . '
+                            LIMIT 1'
+                    );
+                    Db::getInstance()->execute(
+                        'UPDATE `' . bqSQL(_DB_PREFIX_) . 'cart_product`
+                        SET `quantity` = ' . $update . '
+                        WHERE `id_product` = ' . (int) $id_product .
+                        ' AND `id_customization` = ' . (int) $id_customization .
+                        (!empty($id_product_attribute) ? ' AND `id_product_attribute` = ' . (int) $id_product_attribute : '') . '
+                    AND `id_cart` = ' . (int) $this->id . (Configuration::get('PS_ALLOW_MULTISHIPPING') && parent::isMultiAddressDelivery() ? ' AND `id_address_delivery` = ' . (int) $id_address_delivery : '') . '
+                    LIMIT 1'
+                    );
+                } else {
+                    if ($dimension_data[0]['displayquantity'] == 'dimensionedunit') {
+                        if (!isset($oldProductQuantity)) {
+                            $oldProductQuantity = 1;
+                        }
+                        $old_price = $customization_added_to_cart[0]['price'] - ($dimension_data[0]['displaystartingprice'] | floatval) - $customization_added_to_cart[0]['extra_fee'];
+                        $old_unit_price = round(($old_price / $oldProductQuantity), 2);
+                        if ($operator == 'up') {
+                            $new_price = ($cartProductQuantity['quantity'] + 1) * ($old_unit_price / $cartProductQuantity['quantity']) + ($dimension_data[0]['displaystartingprice'] | floatval) + $customization_added_to_cart[0]['extra_fee'];
+                        } else {
+                            $new_price = ($cartProductQuantity['quantity'] - 1) * ($old_unit_price / $cartProductQuantity['quantity']) + ($dimension_data[0]['displaystartingprice'] | floatval) + $customization_added_to_cart[0]['extra_fee'];
+                        }
+                        if ($dimension_data[0]['displayreserve'] > $new_price) {
+                            $new_price = $dimension_data[0]['displayreserve'];
+                        }
+                        Db::getInstance()->execute(
+                            'UPDATE `' . bqSQL(_DB_PREFIX_) . 'customized_data`
+                            SET `price` = ' . (float) $new_price . '
+                                WHERE `id_customization` = ' . (int) $id_customization . ' AND `index` = ' . (int) $index . '
+                                LIMIT 1'
+                        );
+                    }
+                    Db::getInstance()->execute(
+                        'UPDATE `' . bqSQL(_DB_PREFIX_) . 'cart_product`
+                    SET `quantity` = `quantity` ' . pSQL($updateQuantity) . '
+                    WHERE `id_product` = ' . (int) $id_product .
+                        ' AND `id_customization` = ' . (int) $id_customization .
+                        (!empty($id_product_attribute) ? ' AND `id_product_attribute` = ' . (int) $id_product_attribute : '') . '
+                    AND `id_cart` = ' . (int) $this->id . (Configuration::get('PS_ALLOW_MULTISHIPPING') && parent::isMultiAddressDelivery() ? ' AND `id_address_delivery` = ' . (int) $id_address_delivery : '') . '
+                    LIMIT 1'
+                    );
+                }
+            } elseif ($operator == 'up') {
+                $sql = 'SELECT stock.out_of_stock, IFNULL(stock.quantity, 0) as quantity
+                        FROM ' . bqSQL(_DB_PREFIX_) . 'product p
+                        ' . Product::sqlStock('p', $id_product_attribute, true, $shop) . '
+                        WHERE p.id_product = ' . (int) $id_product;
+                $result2 = Db::getInstance()->getRow($sql);
+                if (Pack::isPack($id_product)) {
+                    $result2['quantity'] = Pack::getQuantity($id_product, $id_product_attribute, null, $this);
+                }
+                if (!Product::isAvailableWhenOutOfStock((int) $result2['out_of_stock']) && !$skipAvailabilityCheckOutOfStock) {
+                    if ((int) $quantity > $result2['quantity']) {
+                        return false;
+                    }
+                }
+                if ((int) $quantity < $minimal_quantity) {
+                    return -1;
+                }
+                $result_add = Db::getInstance()->insert('cart_product', array(
+                    'id_product' => (int) $id_product,
+                    'id_product_attribute' => (int) $id_product_attribute,
+                    'id_cart' => (int) $this->id,
+                    'id_address_delivery' => (int) $id_address_delivery,
+                    'id_shop' => (int) $shop->id,
+                    'quantity' => (int) $quantity,
+                    'date_add' => date('Y-m-d H:i:s'),
+                    'id_customization' => (int) $id_customization,
+                ));
+                if (!$result_add) {
+                    return false;
+                }
+            }
+            $this->_products = parent::getProducts(true);
+            parent::update();
+            if ($cart_aggregation == 'on') {
+                $moduleInstance = Module::getInstanceByName('squaremeter');
+                if ((is_callable([$moduleInstance, 'hookActionPresentCart'])) && isset($params)) {
+                    $moduleInstance->hookActionPresentCart($params);
+                }
+            }
+            $context = Context::getContext()->cloneContext();
+            $context->cart = $this;
+            Cache::clean('getContextualValue_*');
+            CartRule::autoRemoveFromCart();
+            if ($auto_add_cart_rule) {
+                CartRule::autoAddToCart($context);
+            }
+            if (($displaycalculator == 1)
+                && (($id_customization == 0) || !isset($id_customization))) {
+                $unitpricewithdimension = 1;
+            } else {
+                $unitpricewithdimension = 0;
+            }
+            if ((($product->customizable) || (Tools::getValue('dim' . $suffix))) && ($unitpricewithdimension != 1)) {
+                $sql = 'select id_customization from ' . bqSQL(_DB_PREFIX_) . 'customized_data ORDER BY id_customization DESC LIMIT 1';
+                $latestcustomization = Db::getInstance()->executeS($sql);
+                $id_customization = $latestcustomization[0]['id_customization'];
+                return parent::_updateCustomizationQuantity(
+                    (int) $quantity,
+                    (int) $id_customization,
+                    (int) $id_product,
+                    (int) $id_product_attribute,
+                    (int) $id_address_delivery,
+                    $operator
+                );
+            }
+            return true;
+        }
+    }
+    /**
+     * Add customization item to database.
+     *
+     * @param int $id_product Product ID
+     * @param int $id_product_attribute ProductAttribute ID
+     * @param int $index Index
+     * @param int $type Type enum
+     *                  - Product::CUSTOMIZE_FILE
+     *                  - Product::CUSTOMIZE_TEXTFIELD
+     * @param string $field Field
+     * @param int $quantity Quantity
+     *
+     * @return bool Success
+     */
+    public function _addCustomization2($id_product, $id_product_attribute, $index, $type, $field, $quantity, $dimension_price)
+    {
+        $id_customization = 0;
+        $exising_customization = Db::getInstance()->executeS(
+            'SELECT cu.`id_customization`, cd.`index`, cd.`value`, cd.`type` FROM `' . bqSQL(_DB_PREFIX_) . 'customization` cu
+            LEFT JOIN `' . bqSQL(_DB_PREFIX_) . 'customized_data` cd
+            ON cu.`id_customization` = cd.`id_customization`
+            WHERE cu.id_cart = ' . (int) $this->id . '
+            AND cu.id_product = ' . (int) $id_product . '
+            AND in_cart = 0'
+        );
+        if ($exising_customization) {
+            foreach ($exising_customization as $customization) {
+                if ($customization['type'] == $type && $customization['index'] == $index) {
+                    Db::getInstance()->execute('
+                        DELETE FROM `' . bqSQL(_DB_PREFIX_) . 'customized_data`
+                        WHERE id_customization = ' . (int) $customization['id_customization'] . '
+                        AND type = ' . (int) $customization['type'] . '
+                        AND `index` = ' . (int) $customization['index']);
+                    if ($type == Product::CUSTOMIZE_FILE) {
+                        @unlink(_PS_UPLOAD_DIR_ . $customization['value']);
+                        @unlink(_PS_UPLOAD_DIR_ . $customization['value'] . '_small');
+                    }
+                    break;
+                }
+            }
+            $id_customization = $exising_customization[0]['id_customization'];
+        } else {
+            if ($this->id) {
+                Db::getInstance()->execute(
+                    'INSERT INTO `' . bqSQL(_DB_PREFIX_) . 'customization` (`id_cart`, `id_product`, `id_product_attribute`, `quantity`)
+                VALUES (' . (int) $this->id . ', ' . (int) $id_product . ', ' . (int) $id_product_attribute . ', ' . (int) $quantity . ')'
+                );
+                $id_customization = Db::getInstance()->Insert_ID();
+            }
+        }
+        if ($id_customization) {
+            $query = 'INSERT INTO `' . bqSQL(_DB_PREFIX_) . 'customized_data` (`id_customization`, `type`, `index`, `value`, `dimension_price`)
+            VALUES (' . (int) $id_customization . ', ' . (int) $type . ', ' . (int) $index . ', \'' . pSQL($field) . '\'' . ', ' . (float) $dimension_price . ')';
+            if (!Db::getInstance()->execute($query)) {
+                return false;
+            }
+        }
+        return true;
+    }
+    public function addTextFieldToProductOverride($id_product, $id_product_attribute, $index, $type, $text_value, $dimension_price, $quantity = 0)
+    {
+        return $this->_addCustomization2($id_product, $id_product_attribute, $index, $type, $text_value, $quantity, $dimension_price);
+    }
+    public static function getAttributeMinimalQty($idProductAttribute)
+    {
+        $minimalQuantity = Db::getInstance()->getValue(
+            '
+			SELECT `minimal_quantity`
+			FROM `' . bqSQL(_DB_PREFIX_) . 'product_attribute_shop` pas
+			WHERE `id_shop` = ' . (int) Context::getContext()->shop->id . '
+			AND `id_product_attribute` = ' . (int) $idProductAttribute
+        );
+
+        if ($minimalQuantity > 1) {
+            return (int) $minimalQuantity;
+        }
+
+        return false;
+    }
+    public function getTotalWeight($products = null)
+    {
+        if (Shop::isFeatureActive()) {
+            $idShop = (int) Context::getContext()->shop->id;
+        } else {
+            $idShop = 1;
+        }
+        if (null !== $products) {
+            $total_weight = 0;
+            foreach ($products as $product) {
+                $dimension_data = Db::getInstance()->executeS('SELECT *
+                    FROM `' . bqSQL(_DB_PREFIX_) . 'squaremeteradmin` pa
+                    WHERE pa.`id_product` = ' . (int) $product['id_product'] . ' AND
+                    pa.`id_shop` = ' . (int) $idShop);
+                if (isset($dimension_data[0]['displaycalculator'])) {
+                    $displaycalculator = $dimension_data[0]['displaycalculator'];
+                } else {
+                    $displaycalculator = 0;
+                }
+                $index = Configuration::get('WD_CUSTOMIZATION_INDEX');
+                $customization_added_to_cart = Db::getInstance()->executeS('SELECT *
+                    FROM `' . bqSQL(_DB_PREFIX_) . 'customized_data`
+                    WHERE `id_customization` = ' . (int) $product['id_customization'] . ' AND `index` = ' . (int) $index);
+                if ($customization_added_to_cart) {
+                    $cart_product_weight = $customization_added_to_cart[0]['weight'];
+                    if (($dimension_data[0]['calculationtype'] == 'weight') && ($displaycalculator == 1)) {
+                        $cart_product_weight = $customization_added_to_cart[0]['converted_ea'];
+                        $total_weight += $cart_product_weight;
+                    } elseif (($dimension_data[0]['calculationtype'] != 'weight') && ($displaycalculator == 1)) {
+                        $original_product = new Product($product['id_product']);
+                        $cart_product_weight = $customization_added_to_cart[0]['converted_ea'] * $original_product->weight;
+                        if ($dimension_data[0]['displayquantity'] == 'decimalok') {
+                            $total_weight += $cart_product_weight;
+                        } elseif ($dimension_data[0]['displayquantity'] == 'dimensionedunit') {
+                            $total_weight += $cart_product_weight * $product['cart_quantity'];
+                        } else {
+                            $total_weight += ($product['weight_attribute'] ?? $product['weight']) * $product['cart_quantity'];
+                        }
+                    } else {
+                        $total_weight += ($product['weight_attribute'] ?? $product['weight']) * $product['cart_quantity'];
+                    }
+                }
+            }
+
+            return $total_weight;
+        }
+
+        if (!isset(self::$_totalWeight[$this->id])) {
+            $this->updateProductWeight($this->id);
+        }
+
+        return self::$_totalWeight[(int) $this->id];
+    }
+}

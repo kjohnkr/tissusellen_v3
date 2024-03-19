@@ -66,7 +66,7 @@
         <ul class="data-sheet">
           {foreach from=$product.grouped_features item=feature}
 	  <li>
-            <span class="name">{$feature.name}</span>
+            <span class="name">{$feature.name}:</span>
             <span class="value">{$feature.value|escape:'htmlall'|nl2br nofilter}</span>
 	  </li>
           {/foreach}

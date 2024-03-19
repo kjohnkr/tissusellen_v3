@@ -37,7 +37,7 @@
       {if $product.unity == '/ mètre'} 
       <div class="price"> 
         <span itemprop="priceCurrency" content="{$currency.iso_code}"></span> 
-        <span class="price" itemprop="price" content="{$product.price_amount}">{l s='%unit_price%' d='Shop.Theme.Catalog' sprintf=['%unit_price%' => $product.unit_price_full]}</span> 
+        <span class="price" itemprop="price" content="{$product.unit_price_tax_included|number_format:2}">{$product.unit_price_tax_included|number_format:2}€ {$product.unity}</span> 
       </div> 
       {else} 
       <span class="price" itemprop="offers" itemscope itemtype="http://schema.org/Offer"> 
