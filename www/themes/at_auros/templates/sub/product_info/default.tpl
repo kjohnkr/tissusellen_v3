@@ -68,7 +68,7 @@
 			            {foreach from=$product.grouped_features item=feature}
 			            <li>
 				  			<span class="name">{$feature.name}:</span>
-			              	<span class="value">{$feature.value|replace:"\n":", "|escape:'htmlall'|nl2br nofilter}</span>
+							<span class="value">{$feature.value|replace:"\n":", "|escape:'htmlall' nofilter}</span>
 						</li>
 			            {/foreach}
 		          	</ul>

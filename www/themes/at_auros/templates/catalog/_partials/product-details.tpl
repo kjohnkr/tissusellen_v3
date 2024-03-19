@@ -65,10 +65,10 @@
         <p class="h6">{l s='Data sheet' d='Shop.Theme.Catalog'}</p>
         <ul class="data-sheet">
           {foreach from=$product.grouped_features item=feature}
-	  <li>
+	        <li>
             <span class="name">{$feature.name}:</span>
-            <span class="value">{$feature.value|escape:'htmlall'|nl2br nofilter}</span>
-	  </li>
+            <span class="value">{$feature.value|replace:"\n":", "|escape:'htmlall' nofilter}</span>
+	        </li>
           {/foreach}
         </ul>
       </section>
