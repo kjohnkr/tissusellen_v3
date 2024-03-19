@@ -16,6 +16,7 @@
 	<div id="product-details" data-product="{$product.embedded_attributes|json_encode}">
 		<h4 class="title-info-product">{l s='Product Details' d='Shop.Theme.Catalog'}</h4>
 	  	{block name='product_reference'}
+			{*
 		    {if !empty($product_manufacturer->id)}
 		      	<div class="product-manufacturer">
 			        {if !empty($manufacturer_image_url)}
@@ -36,6 +37,7 @@
 			        <span itemprop="sku">{$product.reference_to_display}</span>
 		      	</div>
 		    {/if}
+			*}
 	    {/block}
 	    {block name='product_quantities'}
 	      	{if $product.show_quantities}
