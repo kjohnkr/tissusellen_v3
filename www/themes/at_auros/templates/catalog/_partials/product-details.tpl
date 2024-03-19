@@ -11,6 +11,7 @@
      role="tabpanel"
   >
   {block name='product_reference'}
+    {* 
     {if isset($product_manufacturer->id)}
       <div class="product-manufacturer">
         {if isset($manufacturer_image_url)}
@@ -31,6 +32,7 @@
         <span>{$product.reference_to_display}</span>
       </div>
     {/if}
+    *}
   {/block}
 
   {block name='product_quantities'}
