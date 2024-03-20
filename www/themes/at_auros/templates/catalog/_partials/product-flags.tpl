@@ -1,5 +1,5 @@
 {**
- *  9 PrestaShop and Contributors
+ *   PrestaShop and Contributors
  *
  * NOTICE OF LICENSE
  *
@@ -24,8 +24,14 @@
  *}
 {block name='product_flags'}
     <ul class="product-flags js-product-flags">
+        {** Custom flags *}
+        {if $product.custom_flag}
+            <li class="product-flag new">{$product.custom_flag}</li>
+        {else}
+        {** Défault flags *}
         {foreach from=$product.flags item=flag}
             <li class="product-flag {$flag.type}">{$flag.label}</li>
         {/foreach}
+        {/if}
     </ul>
 {/block}

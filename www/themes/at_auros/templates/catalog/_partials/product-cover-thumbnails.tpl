@@ -26,21 +26,27 @@
   {block name='product_cover_thumbnails'}
     {if $isMobile && $dmobile_swipe}
       <div class="list-images-mobile">
+      {include file='catalog/_partials/product-flags.tpl'}
         {foreach from=$product.images item=image}
           <div>
-        <img
-          class="js-qv-product-cover img-fluid"
-          src="{$product.default_image.bySize.medium_default.url}"
-          {if !empty($product.default_image.legend)}
-            alt="{$product.default_image.legend}"
-            title="{$product.default_image.legend}"
-          {else}
-            alt="{$product.name}"
-          {/if}
-          loading="lazy"
-          width="{$product.default_image.bySize.medium_default.width}"
-          height="{$product.default_image.bySize.medium_default.height}"
-        >
+            <picture>
+			  {if !empty($product.default_image.bySize.large_default.sources.avif)}<source srcset="{$product.default_image.bySize.large_default.sources.avif}" type="image/avif">{/if}
+			  {if !empty($product.default_image.bySize.large_default.sources.webp)}<source srcset="{$product.default_image.bySize.large_default.sources.webp}" type="image/webp">{/if}
+			  <img
+				class="js-qv-product-cover img-fluid"
+				src="{$product.default_image.bySize.large_default.url}"
+				{if !empty($product.default_image.legend)}
+				  alt="{$product.default_image.legend}"
+				  title="{$product.default_image.legend}"
+				{else}
+				  alt="{$product.name}"
+				{/if}
+				loading="lazy"
+				width="{$product.default_image.bySize.large_default.width}"
+				height="{$product.default_image.bySize.large_default.height}"
+			  >
+			</picture>
+
           </div>
         {/foreach}
       </div>
@@ -55,18 +61,28 @@
             </ul>
           {/block}
         {if $product.default_image}
-          <img id="zoom_product" data-type-zoom="" class="js-qv-product-cover img-fluid" src="{$product.default_image.bySize.large_default.url}" alt="{$product.default_image.legend}" title="{$product.default_image.legend}" itemprop="image">
-          <div class="layer hidden-sm-down" data-toggle="modal" data-target="#product-modal">
-            <i class="material-icons zoom-in">&#xE8FF;</i>
-          </div>
+			<picture>
+			  {if !empty($product.default_image.bySize.large_default.sources.avif)}<source srcset="{$product.default_image.bySize.large_default.sources.avif}" type="image/avif">{/if}
+			  {if !empty($product.default_image.bySize.large_default.sources.webp)}<source srcset="{$product.default_image.bySize.large_default.sources.webp}" type="image/webp">{/if}
+			  <img id="zoom_product" data-type-zoom="" class="js-qv-product-cover img-fluid" src="{$product.default_image.bySize.large_default.url}" alt="{$product.default_image.legend}" title="{$product.default_image.legend}">
+			</picture>
+          
+			<div class="layer hidden-sm-down" data-toggle="modal" data-target="#product-modal">
+				<i class="material-icons zoom-in">&#xE8FF;</i>
+			</div>
         {else}
-          <img
-          class="img-fluid"
-          src="{$urls.no_picture_image.bySize.medium_default.url}"
-          loading="lazy"
-          width="{$urls.no_picture_image.bySize.medium_default.width}"
-          height="{$urls.no_picture_image.bySize.medium_default.height}"
-        >
+			<picture>
+			  {if !empty($urls.no_picture_image.bySize.large_default.sources.avif)}<source srcset="{$urls.no_picture_image.bySize.large_default.sources.avif}" type="image/avif">{/if}
+			  {if !empty($urls.no_picture_image.bySize.large_default.sources.webp)}<source srcset="{$urls.no_picture_image.bySize.large_default.sources.webp}" type="image/webp">{/if}
+			  <img
+				class="img-fluid"
+				src="{$urls.no_picture_image.bySize.large_default.url}"
+				loading="lazy"
+				width="{$urls.no_picture_image.bySize.large_default.width}"
+				height="{$urls.no_picture_image.bySize.large_default.height}"
+			  >
+			</picture>
+
         {/if}
         </div>
       {/block}
@@ -76,21 +92,27 @@
           {foreach from=$product.images item=image}
             <div class="thumb-container js-thumb-container {if $image.id_image == $product.default_image.id_image} active {/if}">
               <a  href="javascript:void(0)" data-image="{$image.bySize.large_default.url}" data-zoom-image="{$image.bySize.large_default.url}"> 
-<img
-                class="img-fluid thumb js-thumb {if $image.id_image == $product.default_image.id_image} selected js-thumb-selected {/if}"
-                data-image-medium-src="{$image.bySize.medium_default.url}"
-                data-image-large-src="{$image.bySize.large_default.url}"
-                src="{$image.bySize.small_default.url}"
-                {if !empty($image.legend)}
-                  alt="{$image.legend}"
-                  title="{$image.legend}"
-                {else}
-                  alt="{$product.name}"
-                {/if}
-                loading="lazy"
-                width="{$product.default_image.bySize.small_default.width}"
-                height="{$product.default_image.bySize.small_default.height}"
-              >
+				<picture>
+				  {if !empty($image.bySize.small_default.sources.avif)}<source srcset="{$image.bySize.small_default.sources.avif}" type="image/avif">{/if}
+				  {if !empty($image.bySize.small_default.sources.webp)}<source srcset="{$image.bySize.small_default.sources.webp}" type="image/webp">{/if}
+				  <img
+					class="img-fluid thumb js-thumb {if $image.id_image == $product.default_image.id_image} selected js-thumb-selected {/if}"
+					data-image-medium-src="{$image.bySize.medium_default.url}"
+					{if !empty($image.bySize.medium_default.sources)}data-image-medium-sources="{$image.bySize.medium_default.sources|@json_encode}"{/if}
+					data-image-large-src="{$image.bySize.large_default.url}"
+					{if !empty($image.bySize.large_default.sources)}data-image-large-sources="{$image.bySize.large_default.sources|@json_encode}"{/if}
+					src="{$image.bySize.small_default.url}"
+					{if !empty($image.legend)}
+					  alt="{$image.legend}"
+					  title="{$image.legend}"
+					{else}
+					  alt="{$product.name}"
+					{/if}
+					loading="lazy"
+					width="{$product.default_image.bySize.small_default.width}"
+					height="{$product.default_image.bySize.small_default.height}"
+				  >
+				</picture>
               </a>
             </div>
           {/foreach}

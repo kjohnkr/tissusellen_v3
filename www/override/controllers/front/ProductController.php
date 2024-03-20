@@ -11,7 +11,7 @@ class ProductController extends ProductControllerCore
 {
     /*
     * module: leofeature
-    * date: 2024-02-01 22:46:37
+    * date: 2024-02-13 17:12:11
     * version: 2.2.2
     */
     public function initContent()

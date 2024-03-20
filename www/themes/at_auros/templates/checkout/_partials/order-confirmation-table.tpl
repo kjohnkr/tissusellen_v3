@@ -39,11 +39,19 @@
         <div class="order-line row">
           <div class="col-sm-2 col-xs-3">
             <span class="image">
-              {if !empty($product.default_image)}
-                <img src="{$product.default_image.medium.url}" loading="lazy" />
-              {else}
-                <img src="{$urls.no_picture_image.bySize.medium_default.url}" loading="lazy" />
-              {/if}
+{if !empty($product.default_image)}
+                <picture>
+                  {if !empty($product.default_image.medium.sources.avif)}<source srcset="{$product.default_image.medium.sources.avif}" type="image/avif">{/if}
+                  {if !empty($product.default_image.medium.sources.webp)}<source srcset="{$product.default_image.medium.sources.webp}" type="image/webp">{/if}
+                  <img class="img-fluid" src="{$product.default_image.medium.url}" loading="lazy" />
+                </picture>
+{else}
+                <picture>
+                  {if !empty($urls.no_picture_image.bySize.medium_default.sources.avif)}<source srcset="{$urls.no_picture_image.bySize.medium_default.sources.avif}" type="image/avif">{/if}
+                  {if !empty($urls.no_picture_image.bySize.medium_default.sources.webp)}<source srcset="{$urls.no_picture_image.bySize.medium_default.sources.webp}" type="image/webp">{/if}
+                  <img class="img-fluid" src="{$urls.no_picture_image.bySize.medium_default.url}" loading="lazy" />
+                </picture>
+{/if}
             </span>
           </div>
           <div class="col-sm-4 col-xs-9 details">

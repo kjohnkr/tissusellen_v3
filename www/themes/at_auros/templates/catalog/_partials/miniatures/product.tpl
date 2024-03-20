@@ -23,35 +23,50 @@
  * International Registered Trademark & Property of PrestaShop SA
  *}
 {block name='product_miniature_item'}
-<div class="product{if !empty($productClasses)} {$productClasses}{/if}">
-<article class="product-miniature js-product-miniature" data-id-product="{$product.id_product}" data-id-product-attribute="{$product.id_product_attribute}" itemprop="item" itemscope itemtype="http://schema.org/Product">
-	<div class="thumbnail-container">
-		<div class="product-image">
-			{block name='product_thumbnail'}
-				{if isset($cfg_product_list_image) && $cfg_product_list_image}
-					<div class="leo-more-info" data-idproduct="{$product.id_product}"></div>
-				{/if}
-				{if $product.cover}
-					<a href="{$product.url}" class="thumbnail product-thumbnail">
-						<img
-							class="img-fluid"
-							src="{$product.cover.bySize.home_default.url}"
+<div class="js-product product{if !empty($productClasses)} {$productClasses}{/if}">
+	<article class="product-miniature js-product-miniature" data-id-product="{$product.id_product}" data-id-product-attribute="{$product.id_product_attribute}">
+		<div class="thumbnail-container">
+             <div class="product-image thumbnail-top">
+				{block name='product_thumbnail'}
+					{if isset($cfg_product_list_image) && $cfg_product_list_image}
+						<div class="leo-more-info" data-idproduct="{$product.id_product}"></div>
+					{/if}
+					{if $product.cover}
+						<a href="{$product.url}" class="thumbnail product-thumbnail">
+              <picture>
+                {if !empty($product.cover.bySize.home_default.sources.avif)}<source srcset="{$product.cover.bySize.home_default.sources.avif}" type="image/avif">{/if}
+                {if !empty($product.cover.bySize.home_default.sources.webp)}<source srcset="{$product.cover.bySize.home_default.sources.webp}" type="image/webp">{/if}
+							<img
+								class="img-fluid"
+								src = "{$product.cover.bySize.home_default.url}" 
 								loading="lazy" alt = "{if !empty($product.cover.legend)}{$product.cover.legend}{else}{$product.name|truncate:30:'...'}{/if}"
-							data-full-size-image-url="{$product.cover.large.url}"
-						/> 
-						{if isset($cfg_product_one_img) && $cfg_product_one_img}
-							<span class="product-additional" data-idproduct="{$product.id_product}"></span>
-						{/if}
-					</a>
-				{else}
-					<a href="{$product.url}" class="thumbnail product-thumbnail">
-				            <img src="{$urls.no_picture_image.bySize.home_default.url}" loading="lazy" />
-					    {if isset($cfg_product_one_img) && $cfg_product_one_img}
-					    	<span class="product-additional" data-idproduct="{$product.id_product}"></span>
-					    {/if}
-				        </a>
-				{/if}	
-			{/block}
+								data-full-size-image-url = "{$product.cover.large.url}"
+								width="{$product.cover.bySize.home_default.width}"
+                						height="{$product.cover.bySize.home_default.height}"
+							/> 
+							{if isset($cfg_product_one_img) && $cfg_product_one_img}
+								<span class="product-additional" data-idproduct="{$product.id_product}"></span>
+							{/if}
+					</picture>
+						</a>
+					{else}
+						<a href="{$product.url}" class="thumbnail product-thumbnail">
+              <picture>
+                {if !empty($urls.no_picture_image.bySize.home_default.sources.avif)}<source srcset="{$urls.no_picture_image.bySize.home_default.sources.avif}" type="image/avif">{/if}
+                {if !empty($urls.no_picture_image.bySize.home_default.sources.webp)}<source srcset="{$urls.no_picture_image.bySize.home_default.sources.webp}" type="image/webp">{/if}
+					            <img
+					                src="{$urls.no_picture_image.bySize.home_default.url}"
+					                loading="lazy"
+					                width="{$urls.no_picture_image.bySize.home_default.width}"
+					                height="{$urls.no_picture_image.bySize.home_default.height}"
+					              />
+						    {if isset($cfg_product_one_img) && $cfg_product_one_img}
+						    	<span class="product-additional" data-idproduct="{$product.id_product}"></span>
+						    {/if}
+		</picture>
+					        </a>
+					{/if}	
+				{/block}
 			
 			{include file='catalog/_partials/product-flags.tpl'}
 			<div class="functional-buttons clearfix">
@@ -125,7 +140,7 @@
 					{/block}
 				
 					{block name='product_description_short'}
-						<div class="product-description-short" itemprop="description">{$product.description_short|truncate:150:'...' nofilter}</div>
+						<div class="product-description-short">{$product.description_short|strip_tags|truncate:150:'...' nofilter}</div>
 					{/block}
 
 				</div>

@@ -29,7 +29,7 @@
 {/block}
 
 {block name='page_content'}
-  <div class="row">
+  {if $customer.addresses}
     {foreach $customer.addresses as $address}
       <div class="col-lg-4 col-md-6 col-sm-6">
       {block name='customer_address'}
@@ -37,7 +37,11 @@
       {/block}
       </div>
     {/foreach}
-  </div>
+  {else}
+    <div class="alert alert-info" role="alert" data-alert="info">
+      {l s='No addresses are available.' d='Shop.Notifications.Success'} <a href="{$urls.pages.address}" title="{l s='Add a new address' d='Shop.Theme.Actions'}">{l s='Add a new address' d='Shop.Theme.Actions'}</a>
+    </div>
+  {/if}
   <div class="clearfix"></div>
   <div class="addresses-footer">
     <a href="{$urls.pages.address}" data-link-action="add-address">

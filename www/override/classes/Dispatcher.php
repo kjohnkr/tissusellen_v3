@@ -16,7 +16,7 @@ class Dispatcher extends DispatcherCore
 {
 	/*
     * module: leoblog
-    * date: 2024-02-01 22:46:36
+    * date: 2024-02-13 17:12:10
     * version: 3.1.0
     */
     protected function loadRoutes($id_shop = null)

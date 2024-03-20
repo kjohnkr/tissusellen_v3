@@ -1,5 +1,5 @@
 {**
- * Copyright since 2007 PrestaShop SA and Contributors
+ * Copyright since  PrestaShop SA and Contributors
  * PrestaShop is an International Registered Trademark & Property of PrestaShop SA
  *
  * NOTICE OF LICENSE
@@ -19,7 +19,7 @@
  * needs please refer to https://devdocs.prestashop.com/ for more information.
  *
  * @author    PrestaShop SA and Contributors <contact@prestashop.com>
- * @copyright Since 2007 PrestaShop SA and Contributors
+ * @copyright Since  PrestaShop SA and Contributors
  * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License 3.0 (AFL-3.0)
  *}
 <script type="application/ld+json">
@@ -27,12 +27,12 @@
     "@context": "https://schema.org",
     "@type": "Organization",
     "name" : "{$shop.name}",
-    "url" : "{$urls.pages.index}",
+    "url" : "{$urls.pages.index}"
     {if $shop.logo_details}
-    "logo": {
-      "@type": "ImageObject",
+     ,"logo": {
+        "@type": "ImageObject",
         "url":"{$shop.logo_details.src}"
-    }
+      }
     {/if}
   }
 </script>
@@ -58,10 +58,10 @@
       "@type": "WebSite",
       "url" : "{$urls.pages.index}",
       {if $shop.logo_details}
-      "image": {
-        "@type": "ImageObject",
+        "image": {
+          "@type": "ImageObject",
           "url":"{$shop.logo_details.src}"
-      },
+        },
       {/if}
       "potentialAction": {
         "@type": "SearchAction",
@@ -78,15 +78,15 @@
       "@context": "https://schema.org",
       "@type": "BreadcrumbList",
       "itemListElement": [
-          {foreach from=$breadcrumb.links item=path name=breadcrumb}
-            {
-              "@type": "ListItem",
-              "position": {$smarty.foreach.breadcrumb.iteration},
-              "name": "{$path.title}",
-              "item": "{$path.url}"
-              }{if !$smarty.foreach.breadcrumb.last},{/if}
+        {foreach from=$breadcrumb.links item=path name=breadcrumb}
+          {
+            "@type": "ListItem",
+            "position": {$smarty.foreach.breadcrumb.iteration},
+            "name": "{$path.title}",
+            "item": "{$path.url}"
+          }{if !$smarty.foreach.breadcrumb.last},{/if}
         {/foreach}
       ]
-          }
+    }
   </script>
 {/if}
