@@ -25,6 +25,13 @@ www/themes/at_auros/modules/appagebuilder/*
 www/themes/at_auros/modules/appagebuilder/views/*
 !www/themes/at_auros/modules/appagebuilder/views/templates
 
+
+!www/themes/at_auros/modules/contactform
+www/themes/at_auros/modules/contactform/*
+!www/themes/at_auros/modules/contactform/views
+www/themes/at_auros/modules/contactform/views/*
+!www/themes/at_auros/modules/contactform/views/templates
+
 !www/themes/at_auros/mails
 !www/themes/at_auros/templates
 # !www/themes/at_auros/modules/appagebuilder
