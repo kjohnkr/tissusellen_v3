@@ -25,6 +25,13 @@ services:
         - DB_SERVER=mysql 
         - PS_DOMAIN=${APP_URL}
 
+    certbot:
+        image: certbot/certbot:latest
+        volumes:
+            - ./certbot/www/:/var/www/certbot/:rw
+            - ./certbot/conf/:/etc/letsencrypt/:rw
+        entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+
     mysql:
         image: mysql:8.2.0
         ports:
@@ -49,29 +56,31 @@ services:
             - ./www/:/var/www/html/
             - ./logs/apache2/:/var/log/apache2/
             - ./config-files/apache2/httpd.conf:/usr/local/apache2/conf/httpd.conf
+            - ./certbot/www:/var/www/certbot/:ro
+            - ./certbot/conf/:/etc/letsencrypt/:ro
         restart: always
 
-    ftpd_server:
-        build:
-            context: .
-            dockerfile: ./config-files/ftp/Dockerfile
-        container_name: pure-ftpd
-        ports:
-            - "21:21"
-            - "30000-30009:30000-30009"
-        volumes:
-            - "${PWD}/www:/home/ftp/"
-            - "/home/ftp/docker"
-            - "/home/ftp/db"
-            - "/home/ftp/.git"
-        environment:
-            PUBLICHOST: "localhost"
-            FTP_USER_NAME: ${FTP_USER}
-            FTP_USER_PASS: ${FTP_PASSWORD}
-            FTP_USER_HOME: /home/ftp
-            FTP_USER_UID: 33
-            FTP_USER_GID: 33
-        restart: always
+    # ftpd_server:
+    #     build:
+    #         context: .
+    #         dockerfile: ./config-files/ftp/Dockerfile
+    #     container_name: pure-ftpd
+    #     ports:
+    #         - "21:21"
+    #         - "30000-30009:30000-30009"
+    #     volumes:
+    #         - "${PWD}/www:/home/ftp/"
+    #         - "/home/ftp/docker"
+    #         - "/home/ftp/db"
+    #         - "/home/ftp/.git"
+    #     environment:
+    #         PUBLICHOST: "localhost"
+    #         FTP_USER_NAME: ${FTP_USER}
+    #         FTP_USER_PASS: ${FTP_PASSWORD}
+    #         FTP_USER_HOME: /home/ftp
+    #         FTP_USER_UID: 33
+    #         FTP_USER_GID: 33
+    #     restart: always
 
 
     # SOURCE : https://hub.docker.com/_/phpmyadmin
