@@ -1,6 +1,7 @@
 www/*
 logs/*
 .env
+certbot/*
 
 !www/themes
 www/themes/*
