@@ -31,6 +31,31 @@
         <h4>{l s='This page could not be found' d='Shop.Theme.Global'}</h4>
         <p>{l s='Try to search our catalog, you may find what you are looking for!' d='Shop.Theme.Global'}</p>
       {/if}
+
+      <div class="modal fade" role="dialog" id="modal-not-found">
+        <div class="modal-dialog  modal-dialog-centered" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-label="{l s='Close' d='Shop.Theme.Global'}">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <div class="row">
+                <div class="col-md-12 col-sm-12">
+                  <h3>Aucun produit disponible dans cette catégorie pour le moment</h3>
+                  <p style="font-size:14px">Restez à l'écoute, d'autres produits seront affichés ici au fur et à mesure qu'ils seront ajoutés.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <script>
+        $('#modal-not-found').modal('show');
+      </script>
+
     {/block}
 
     {block name='search'}
