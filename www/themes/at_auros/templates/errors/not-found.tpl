@@ -53,7 +53,9 @@
       </div>
 
       <script>
-        $('#modal-not-found').modal('show');
+        $(function() {
+          $('#modal-not-found').modal('show');
+        });
       </script>
 
     {/block}
