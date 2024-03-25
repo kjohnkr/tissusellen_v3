@@ -52,8 +52,9 @@
         </div>
       </div>
 
-      <script>
+      <script type="text/javascript">
         $(function() {
+          console.log('modal show');
           $('#modal-not-found').modal('show');
         });
       </script>
