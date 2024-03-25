@@ -52,13 +52,6 @@
         </div>
       </div>
 
-      <script type="text/javascript">
-        $(function() {
-          console.log('modal show');
-          $('#modal-not-found').modal('show');
-        });
-      </script>
-
     {/block}
 
     {block name='search'}
