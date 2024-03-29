@@ -48,7 +48,7 @@
               </span>
               (
               {if $product.has_discount}
-                <span class="regular-price">{$product.price_without_reduction * 10)|number_format:2}€</span>
+                <span class="regular-price">{($product.price_without_reduction * 10)|number_format:2}€</span>
               {/if}
               <span class='secondary-price' content="{$product.unit_price_full}">
                 soit {$product.unit_price_full}
