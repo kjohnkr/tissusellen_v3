@@ -24,14 +24,17 @@
  *}
 {block name='product_flags'}
     <ul class="product-flags js-product-flags">
-        {** Custom flags *}
         {if $product.custom_flag}
+            {** Custom flags *}
             <li class="product-flag new">{$product.custom_flag}</li>
         {else}
-        {** Défault flags *}
-        {foreach from=$product.flags item=flag}
-            <li class="product-flag {$flag.type}">{$flag.label}</li>
-        {/foreach}
+            {** Défault flags *}
+            {foreach from=$product.flags item=flag}
+                <li class="product-flag {$flag.type}">{$flag.label}</li>
+            {/foreach}
+            {if isset($product_manufacturer->id)}
+                <li class="product-flag new">{$product_manufacturer->name}</li>
+            {/if}
         {/if}
     </ul>
 {/block}
