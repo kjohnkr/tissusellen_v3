@@ -52,7 +52,7 @@
                 {if $product.has_discount}
                   <span class="regular-price">{($product.price_without_reduction * 10)|number_format:2}€</span>
                 {/if}
-                <span class="{if $product.has_discount} highlight-discount{/if}">{$product.unit_price_full}</span>)
+                <span class="{if $product.has_discount}highlight-discount{/if}">{$product.unit_price_full}</span>)
               </span>
             {else}
               {* <span itemprop="price" content="{$product.unit_price_full}">{l s='%unit_price%' d='Shop.Theme.Catalog' sprintf=['%unit_price%' => $product.unit_price_full]}</span> *}
