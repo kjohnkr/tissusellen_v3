@@ -55,13 +55,10 @@
   {foreach from=$product.flags item=flag}
 	<li class="product-flag {$flag.type}">{$flag.label}</li>
   {/foreach}
-</ul>
-
 {if !empty($product->manufacturer_name)}
-<ul class="product-flags product-flags-bottom">
     <li class="product-flag new">{$product->manufacturer_name}</li>
-</ul>
 {/if}
+</ul>
 {/block}
 <div class="pro3-btn">
 <!-- @file modules\appagebuilder\views\templates\front\products\file_tpl -->
