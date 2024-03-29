@@ -43,17 +43,17 @@
             {if $product.unity == '/ mètre'}
               {* <span itemprop="price" content="{$product.unit_price_full}">{l s='%unit_price%' d='Shop.Theme.Catalog' sprintf=['%unit_price%' => $product.price]} {l s='/ 10cm' d='Shop.Theme.Catalog'}</span> *}
               {* <span class="secondary-price" itemprop="price" content="{$product.unit_price_full}">({l s='%unit_price%' d='Shop.Theme.Catalog' sprintf=['%unit_price%' => $product.unit_price_full]})</span> *}
-              <span class='current-price-value' content="{$product.price}">
+              <span class='current-price-value{if $product.has_discount} highlight-discount{/if}' content="{$product.price}">
                 {$product.price} {l s='/ 10cm' d='Shop.Theme.Catalog'}
               </span>
               
             <span class='secondary-price{if $product.has_discount} product-discount{/if}' content="{$product.unit_price_full}">
-                ({if $product.has_discount}
+                (soit
+                {if $product.has_discount}
                   <span class="regular-price">{($product.price_without_reduction * 10)|number_format:2}€</span>
                 {/if}
-                soit {$product.unit_price_full})
+                <span class="{if $product.has_discount} highlight-discount{/if}">{$product.unit_price_full}</span>)
               </span>
-              
             {else}
               {* <span itemprop="price" content="{$product.unit_price_full}">{l s='%unit_price%' d='Shop.Theme.Catalog' sprintf=['%unit_price%' => $product.unit_price_full]}</span> *}
               <span class='current-price-value' content="{$product.unit_price_full}">
@@ -62,7 +62,7 @@
             {/if}
           {else}
             {* <span itemprop="price" content="{$product.rounded_display_price}">{$product.price} {if $product.unity}{$product.unity}{/if}</span> *}
-            <span class='current-price-value' content="{$product.rounded_display_price}">
+            <span class='current-price-value{if $product.has_discount} highlight-discount{/if}' content="{$product.rounded_display_price}">
             {capture name='custom_price'}{hook h='displayProductPriceBlock' product=$product type='custom_price' hook_origin='product_sheet'}{/capture}
             {if '' !== $smarty.capture.custom_price}
               {$smarty.capture.custom_price nofilter}
