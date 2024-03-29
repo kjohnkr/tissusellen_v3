@@ -888,6 +888,5 @@ $(function() {
 });
 
 $(function() {
-	console.log('modal show');
 	$('#modal-not-found').modal('show');
 });
