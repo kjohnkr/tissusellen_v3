@@ -52,12 +52,13 @@
                 {if $product.has_discount}
                   <span class="regular-price">{($product.price_without_reduction * 10)|number_format:2}€</span>
                 {/if}
-                <span class="{if $product.has_discount}highlight-discount{/if}">{$product.unit_price_full}</span>)
+                <span class="{if $product.has_discount}highlight-discount{/if}">{$product.unit_price}</span>
+                <span> / mètre</span>)
               </span>
             {else}
               {* <span itemprop="price" content="{$product.unit_price_full}">{l s='%unit_price%' d='Shop.Theme.Catalog' sprintf=['%unit_price%' => $product.unit_price_full]}</span> *}
-              <span class='current-price-value' content="{$product.unit_price_full}">
-                <span class="{if $product.has_discount}highlight-discount{/if}">{$product.unit_price}</span> / mètre
+              <span class='current-price-value {if $product.has_discount}highlight-discount{/if}' content="{$product.unit_price_full}">
+                {$product.unit_price}
               </span>
             {/if}
           {else}
