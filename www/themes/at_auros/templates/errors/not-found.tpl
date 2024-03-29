@@ -45,8 +45,8 @@
                 <div class="col-md-12 col-sm-12">
                   <h3>Aucun produit disponible dans cette catégorie pour le moment</h3>
                   <p style="font-size:14px">Restez à l'écoute, d'autres produits seront affichés ici au fur et à mesure qu'ils seront ajoutés.</p>
-                  <p style="font-size:14px; color:#eb7025;">
-                    <a href="https://www.tissusellen.com/12-toutes-les-matieres">En attendant, vous pouvez consulter tous nos tissus en cliquant ici</a>
+                  <p>
+                    <a style="font-size:14px; color:#eb7025;" href="https://www.tissusellen.com/12-toutes-les-matieres">En attendant, vous pouvez consulter tous nos tissus en cliquant ici</a>
                   </p>
                 </div>
               </div>
