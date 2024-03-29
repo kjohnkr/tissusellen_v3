@@ -46,9 +46,14 @@
               <span class='current-price-value' content="{$product.price}">
                 {$product.price} {l s='/ 10cm' d='Shop.Theme.Catalog'}
               </span>
+              (
+              {if $product.has_discount}
+                <span class="regular-price">{$product.price_without_reduction * 10)|number_format:2}€</span>
+              {/if}
               <span class='secondary-price' content="{$product.unit_price_full}">
-                {$product.unit_price_full}
+                soit {$product.unit_price_full}
               </span>
+              )
             {else}
               {* <span itemprop="price" content="{$product.unit_price_full}">{l s='%unit_price%' d='Shop.Theme.Catalog' sprintf=['%unit_price%' => $product.unit_price_full]}</span> *}
               <span class='current-price-value' content="{$product.unit_price_full}">
@@ -80,9 +85,9 @@
             {if $product.discount_type === 'percentage'}
               <span class="discount discount-percentage">{l s='Save %percentage%' d='Shop.Theme.Catalog' sprintf=['%percentage%' => $product.discount_percentage_absolute]}</span>
             {else}
-              <span class="discount discount-amount">
+              {* <span class="discount discount-amount">
                   {l s='Save %amount%' d='Shop.Theme.Catalog' sprintf=['%amount%' => $product.discount_to_display]}
-              </span>
+              </span> *}
             {/if}
           {/if}
         </div>
